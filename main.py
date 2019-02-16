@@ -48,6 +48,24 @@ from enum import IntEnum
 import random
 
 
+class PassThroughOps:
+    def __init__(self):
+        self.string_mode = False
+        self.normal_ops = [str(n) for n in range(10)]
+
+    def __getitem__(self, key):
+        return lambda d: ([key], [], d)
+
+    def __contains__(self, key):
+        if self.string_mode:
+            return key != '"'
+        else:
+            return key in self.normal_ops
+
+    def toggle_string_mode(self):
+        self.string_mode = not self.string_mode
+
+
 class Direction(IntEnum):
     UP = 0,
     DOWN = 1,
@@ -63,12 +81,15 @@ OPS_END = {
     '@': None
 }
 
-OPS_TRAMP = {
+OPS_SKIP = {
     '#': None
 }
 
-# create integer ops (values to push, direction change)
-OPS_NUM = [str(o) for o in range(10)]
+OPS_STR = {
+    '"': None
+}
+
+OPS_PUSH = PassThroughOps()
 
 OPS_0 = {
     ' ': lambda d: ([], [], d),
@@ -86,7 +107,7 @@ OPS_1 = {
     ':': lambda d, a: ([a, a] if a != 0 else [0, 0], [], d),
     '$': lambda d, a: ([], [], d),
     '.': lambda d, a: ([], [int(a)], d),
-    ',': lambda d, a: ([], [chr(a)], d),
+    ',': lambda d, a: ([], [chr(a) if type(a) is int else a], d),
 }
 
 OPS_2 = {
@@ -162,6 +183,7 @@ class CodeMatrix:
 class InterperaterState:
 
     def __init__(self, code):
+        self.tick = 0
         self.code_matrix = CodeMatrix(code)
         self.direction = Direction.RIGHT
 
@@ -179,13 +201,18 @@ class InterperaterState:
         op = self.code_matrix.current_op
         d = self.direction
 
-        skip = False
-
-        if op in OPS_END:
+        if op in OPS_PUSH:
+            result = OPS_PUSH[op](d)
+        elif op is OPS_SKIP:
+            self.code_matrix.update_pointer(self.direction, skip=True)
+            return
+        elif op in OPS_END:
             self.run = False
             return
-        elif op in OPS_NUM:
-            result = ([op], [], d)
+        elif op in OPS_STR:
+            OPS_PUSH.toggle_string_mode()
+            self.code_matrix.update_pointer(self.direction)
+            return
         elif op in OPS_0:
             result = OPS_0[op](d)
         elif op in OPS_1:
@@ -195,26 +222,21 @@ class InterperaterState:
             a = self.pop()
             b = self.pop()
             result = OPS_2[op](d, a, b)
-        elif op is OPS_TRAMP:
-            skip = True
 
-        if not result and not skip:
+        if not result:
             raise Exception('no result found')
 
-        if skip:
-            self.code_matrix.update_pointer(self.direction, skip=True)
-        else:
-            stack_vals, output_vals, d = result
+        stack_vals, output_vals, d = result
 
-            self.direction = d
+        self.direction = d
 
-            for v in stack_vals:
-                self.push(v)
+        for v in stack_vals:
+            self.push(v)
 
-            for v in output_vals:
-                self.output += output_vals
+        for v in output_vals:
+            self.output += v
 
-            self.code_matrix.update_pointer(self.direction)
+        self.code_matrix.update_pointer(self.direction)
 
     def __str__(self):
         return "InterpraterState: direction={0} output={1} stack={2} pointer={3} current_op={4}".format(self.direction, self.output, self.stack, self.code_matrix.pointer, self.code_matrix.current_op)
@@ -226,11 +248,12 @@ def interpret(code, verbose=False):
 
     print(state.code_matrix.code_to_string())
 
-    while state.run:
+    while True:
         state.run_op()
-
         if verbose:
             print(str(state))
+        if not state.run:
+            break
 
     return state.output
 
@@ -241,7 +264,7 @@ if __name__ == '__main__':
     ##output = interpret('>987v>.v\nv456<  :\n>321 ^ _@')
 
     output = interpret([
-        '12v  5',
+        '12v  ,',
         '89<45^',
         '     @'
     ], verbose=True)
