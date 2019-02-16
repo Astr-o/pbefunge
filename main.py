@@ -71,6 +71,7 @@ OPS_TRAMP = {
 OPS_NUM = [str(o) for o in range(10)]
 
 OPS_0 = {
+    ' ': lambda d: ([], [], d),
     '>': lambda d: ([], [], Direction.RIGHT),
     '<': lambda d: ([], [], Direction.LEFT),
     '^': lambda d: ([], [], Direction.UP),
@@ -107,7 +108,13 @@ def print_code(code_matrix):
 class CodeMatrix:
 
     def __init__(self, code):
-        self.code_matrix = [list(line) for line in code.split('\n')]
+        if type(code) is str:
+            self.code_matrix = [list(line) for line in code.split('\n')]
+        elif type(code) is list:
+            self.code_matrix = [list(line) for line in code]
+        else:
+            raise TypeError(
+                'code is {0} expected [str, list]'.format(type(code)))
         self.pointer = (0, 0)
 
     def update_pointer(self, direction, skip=False):
@@ -125,6 +132,15 @@ class CodeMatrix:
             self.pointer = (x+step, y)
         else:
             raise TypeError('direction is not valid: ' + direction)
+
+        # check if pointer is at the edge
+        x, y = self.pointer
+
+        if x >= len(self.code_matrix[y]) or x < 0:
+            self.pointer = (x % len(self.code_matrix[y]), y)
+
+        if y >= len(self.code_matrix) or y < 0:
+            self.pointer = (x, y % len(self.code_matrix))
 
         return self.current_op
 
@@ -220,6 +236,14 @@ def interpret(code, verbose=False):
 
 
 if __name__ == '__main__':
-    output = interpret('123522v\n@11246<', verbose=True)
+    #output = interpret('123522v\n@11246<', verbose=True)
+
+    ##output = interpret('>987v>.v\nv456<  :\n>321 ^ _@')
+
+    output = interpret([
+        '12v  5',
+        '89<45^',
+        '     @'
+    ], verbose=True)
 
     print('complete: ' + '"' + output + '"')
