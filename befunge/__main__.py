@@ -43,35 +43,29 @@
 
 # "123456789".equals(new BefungeInterpreter().interpret(">987v>.v\nv456<  :\n>321 ^ _@")
 #                    This test case will be added for you.
-
-
 import sys
-
-print(sys.path)
-
-from interpreter import InterperaterState
+from interpreter import Interpereter
 
 
 def interpret(code, verbose=False):
-    state = InterperaterState(code)
+    interpereter = Interpereter(code)
     print('interpreting...')
 
-    print(state.code_matrix.code_to_string())
+    print(interpereter.state._memory.dump())
 
-    while True:
-        state.run_op()
+    while not interpereter.terminated:
+        interpereter.run_op()
+
         if verbose:
-            print(str(state))
-        if not state.run:
-            break
+            print(str(interpereter.state))
 
-    return state.output
+    return interpereter.output
 
 
 if __name__ == '__main__':
-    #output = interpret('123522v\n@11246<', verbose=True)
+    # output = interpret('123522v\n@11246<', verbose=True)
 
-    ##output = interpret('>987v>.v\nv456<  :\n>321 ^ _@')
+    # output = interpret('>987v>.v\nv456<  :\n>321 ^ _@')
 
     output = interpret([
         '12v  ,',

@@ -1,3 +1,15 @@
+import os
+import sys
+
+
+def set_python_env():
+
+    MODULE_FOLDER = os.path.join(os.path.split(
+        os.path.dirname(__file__))[0], 'befunge')
+    print(MODULE_FOLDER)
+
+    if MODULE_FOLDER not in sys.path:
+        sys.path.append(MODULE_FOLDER)
 
 
 def convert_list_to_chars(l):
