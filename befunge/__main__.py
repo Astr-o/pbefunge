@@ -63,14 +63,15 @@ def interpret(code, verbose=False):
 
 
 if __name__ == '__main__':
-    # output = interpret('123522v\n@11246<', verbose=True)
 
-    # output = interpret('>987v>.v\nv456<  :\n>321 ^ _@')
-
-    output = interpret([
+    tests = [
+        interpret([
         '12v  ,',
         '89<45^',
-        '     @'
-    ], verbose=True)
+        '     @'], verbose=True),
+        interpret('123522v\n@11246<', verbose=True),
+        interpret('>987v>.v\nv456<  :\n>321 ^ _@', verbose=True)
+    ]
 
-    print('complete: ' + '"' + output + '"')
+    for t in tests:
+        print('complete: ' + '"' + t + '"')

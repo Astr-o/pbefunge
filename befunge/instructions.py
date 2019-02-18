@@ -6,13 +6,12 @@ from direction import Direction
 Instruction = namedtuple('Instruction', [
     'push', 'output', 'direction', 'put', 'toggle_str_mode', 'skip', 'end', 'get'], )
 
-
 def return_ops(direction=None, push=[], output=[], put={}, toggle_str_mode=False, end=False, skip=False, get=None):
     return Instruction(push, output, direction, put, toggle_str_mode, skip, end, get)
 
-
 class PassThroughOps:
-    ''' will write the symbol directy to the stack, when string_mode is activated all character will be added to the stack as literals '''
+    ''' will push the symbol directy to the stack, when string_mode is 
+        activated all character will be added to the stack as literals '''
 
     def __init__(self):
         self.string_mode = False
@@ -51,7 +50,7 @@ OPS_1 = {
     '!': lambda a: return_ops(push=[1] if not a else [0]),
     '_': lambda a: return_ops(direction=Direction.RIGHT if a == 0 else Direction.LEFT),
     '|': lambda a: return_ops(direction=Direction.DOWN if a == 0 else Direction.UP),
-    ':': lambda a: return_ops(push=[a, a] if a != 0 else [0, 0]),
+    ':': lambda a: return_ops(push=[a, a] if a != 0 else [0]),
     '.': lambda a: return_ops(output=[int(a)]),
     ',': lambda a: return_ops(output=[chr(a) if type(a) is int else a]),
 }

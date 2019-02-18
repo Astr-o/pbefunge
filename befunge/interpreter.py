@@ -23,17 +23,26 @@ class InterpereterState:
     def current_op(self):
         return self._memory.current_op
 
+    # memory operations
+
     def get(self, x, y):
         self._memory.get(x, y)
 
     def put(self, x, y, v):
         self._memory.put(x, y)
 
+    # stack operations
+
     def pop(self):
-        return self.stack.pop()
+        try:
+            return self.stack.pop()
+        except IndexError:
+            return 0
 
     def push(self, i):
         self.stack.append(i)
+
+    # pointer operations
 
     def advance_pointer(self, skip=False):
         self.tick += 1
@@ -72,14 +81,15 @@ class Interpereter:
         for i in instruction.output:
             self.state.output += str(i)
 
+        # retrieve values from memory
         if instruction.get:
             x, y = instruction.get
             v = self.state.get(x, y)
 
-            # put any values into memory
+        # put any values into memory
         for p, v in instruction.put.items():
             x, y = p
-            self.state._memory.put(x, y, v)
+            self.state.put(x, y, v)
 
         #
         if instruction.toggle_str_mode:
@@ -90,13 +100,13 @@ class Interpereter:
     def run_op(self):
         op = self.state.current_op
 
-        # lookup symbol nargs, number of values for the function
+        # lookup symbol nargs, and lambda instruction builder
         nargs, func = lookup_symbol(op)
 
         # pop relavent values from the stack
         args = [self.state.pop() for _ in range(nargs)]
 
-        # build instruction output from args
+        # build instruction by calling lambda
         instruction = func(*args) if args else func()
 
         # update interperater state
