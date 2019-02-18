@@ -33,6 +33,7 @@ class PassThroughOps:
 
 OPS_PASS = PassThroughOps()
 
+''' instructions with not requirements to access stack for input '''
 OPS_0 = {
     ' ': lambda: return_ops(),
     '>': lambda: return_ops(direction=Direction.RIGHT),
@@ -46,11 +47,11 @@ OPS_0 = {
 }
 
 OPS_1 = {
+    '$': lambda a: return_ops(),
     '!': lambda a: return_ops(push=[1] if not a else [0]),
     '_': lambda a: return_ops(direction=Direction.RIGHT if a == 0 else Direction.LEFT),
     '|': lambda a: return_ops(direction=Direction.DOWN if a == 0 else Direction.UP),
     ':': lambda a: return_ops(push=[a, a] if a != 0 else [0, 0]),
-    '$': lambda a: return_ops(),
     '.': lambda a: return_ops(output=[int(a)]),
     ',': lambda a: return_ops(output=[chr(a) if type(a) is int else a]),
 }
