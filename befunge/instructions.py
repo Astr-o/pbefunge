@@ -1,10 +1,11 @@
 import random
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
 from direction import Direction
+import inspect
 
 Instruction = namedtuple('Instruction', [
-    'push', 'output', 'direction', 'put', 'toggle_str_mode', 'skip', 'end', 'get'], )
+                         'push', 'output', 'direction', 'put', 'toggle_str_mode', 'skip', 'end', 'get'], )
 
 
 def return_ops(direction=None, push=[], output=[], put={}, toggle_str_mode=False, end=False, skip=False, get=None):
@@ -73,6 +74,7 @@ OPS_3 = {
 
 
 def lookup_symbol(c):
+
     if c in OPS_PASS:
         return (0, OPS_PASS[c])
     elif c in OPS_0:

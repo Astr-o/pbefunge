@@ -35,6 +35,8 @@
 # Here's an example:
 
 # >987v > .v
+
+
 # v456 < :
 # >321 ^ _@
 # will create the output 123456789.
@@ -44,22 +46,13 @@
 # "123456789".equals(new BefungeInterpreter().interpret(">987v>.v\nv456<  :\n>321 ^ _@")
 #                    This test case will be added for you.
 import sys
-from interpreter import Interpereter
+from befunge import BefungeVM
 
 
 def interpret(code, verbose=False):
-    interpereter = Interpereter(code)
-    print('interpreting...')
+    output = BefungeVM.run_program(code, verbose=True)
 
-    print(interpereter.state._memory.dump())
-
-    while not interpereter.terminated:
-        interpereter.run_op()
-
-        if verbose:
-            print(str(interpereter.state))
-
-    return interpereter.output
+    return output
 
 
 if __name__ == '__main__':
