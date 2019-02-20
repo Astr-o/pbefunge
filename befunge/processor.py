@@ -14,8 +14,13 @@ class ProcessorState:
     def __str__(self):
         return "InterpraterState: tick={0} direction={1} stack={2} output={3} terminated={4}".format(self.tick, self.direction, self.stack, self.output, self.terminated)
 
+    # stack operations
+
     def pop(self):
-        return self.stack.pop()
+        try:
+            return self.stack.pop()
+        except IndexError:
+            return 0
 
     def push(self, i):
         self.stack.append(i)
@@ -57,6 +62,7 @@ class Processor:
         for i in instruction.output:
             self.state.output += str(i)
 
+        # retrieve values from memory
         if instruction.get:
             x, y = instruction.get
             v = self.memory.get(x, y)
@@ -74,12 +80,13 @@ class Processor:
 
     def _fetch_instruction(self, op):
          # lookup symbol nargs, number of values to pop from the stack
+
         nargs, func = lookup_symbol(op)
 
         # pop relavent values from the stack
         args = [self.state.pop() for _ in range(nargs)]
 
-        # build instruction output from args
+        # build instruction by calling lambda
         instruction = func(*args) if args else func()
 
         return instruction
